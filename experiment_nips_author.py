@@ -17,7 +17,7 @@ except ImportError:
 
 from ete3 import Tree
 try:
-    from ete3 import TreeStyle, NodeStyle
+    from ete3 import TreeStyle, NodeStyle # need `conda install pyqt=4.11.4`
 except ImportError:
     pass
 
@@ -208,7 +208,7 @@ class InfoClusterWrapper(InfoCluster):
         if(weight_method=='triangle-power'):            
             info_clustering_add_weight(G)
         try:
-            super().fit(G, use_pdt=True)
+            super().fit(G, use_psp_i=True)
         except RuntimeError as e:
             print(e)
             # dump the graph
