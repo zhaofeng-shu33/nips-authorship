@@ -39,9 +39,8 @@ class info_clustering_prediction(InfoCluster):
             for j in node_j.get_leaves():
                 i_index = int(i.name)
                 j_index = int(j.name)
-                if(j_index > i_index):
-                    continue
-                w += self.G[i_index][j_index]['weight']
+                if(self.G.has_edge(i_index, j_index)):
+                    w += self.G[i_index][j_index]['weight']
         return w
         
     def predict_with_same_ancestor(self, tree_node, node_index_i, node_index_j, weight_added):
@@ -58,7 +57,7 @@ class info_clustering_prediction(InfoCluster):
             affinity_matrix[node_index_j, node_index_i] = weight_added
         new_ic = InfoCluster(affinity='precomputed')
         new_ic.fit(affinity_matrix, use_psp_i=True)            
-        is_solution_trivial = len(new_ic.critical_values) > 1
+        is_solution_trivial = len(new_ic.critical_values) == 1
         return is_solution_trivial
         
     def predict_with_different_ancestor(self, parent_node, foreign_node_index, weight_added):
@@ -86,9 +85,8 @@ class info_clustering_prediction(InfoCluster):
         if(node_i_parent == node_j_parent):
             return self.predict_with_same_ancestor(node_i_parent, node_index_i, node_index_j, weight_added)
         else:
-            j_join_i = self.predict_with_different_ancestor(node_i_parent, node_index_j, weight_added) 
-            if(j_join_i):
-                return True
-            i_join_j = self.predict_with_different_ancestor(node_j_parent, node_index_i, weight_added)
-            return i_join_j
+            if(node_i_parent.cv > node_j_parent.cv):
+                return self.predict_with_different_ancestor(node_i_parent, node_index_j, weight_added) 
+            else:
+                return self.predict_with_different_ancestor(node_j_parent, node_index_i, weight_added)
             

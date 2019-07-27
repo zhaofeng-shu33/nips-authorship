@@ -30,11 +30,42 @@ class TestIcPrediction(unittest.TestCase):
         g.add_edge(1, 2, weight=1)
         g.add_edge(2, 3, weight=1)
         ic = info_clustering_prediction()
-        ic.fit(g)
+        ic.fit(g, weight_method=None)
         self.assertTrue(ic.predict(0, 3))   
         self.assertTrue(ic.predict(3, 0))   
         self.assertFalse(ic.predict(0, 2))   
         self.assertFalse(ic.predict(2, 0))   
-        
+
+    def test_predict_with_different_ancestor_false(self):
+        g = nx.Graph()
+        g.add_edge(0, 1, weight=1)
+        g.add_edge(0, 2, weight=1)
+        g.add_edge(1, 2, weight=1)
+        g.add_node(3)
+        ic = info_clustering_prediction()
+        ic.fit(g, weight_method=None)
+        self.assertFalse(ic.predict(0, 3))   
+        self.assertFalse(ic.predict(3, 0))
+
+    def test_predict_with_different_ancestor_false_2(self):
+        g = nx.Graph()
+        g.add_edge(0, 1, weight=1)
+        g.add_edge(2, 3, weight=1)
+        ic = info_clustering_prediction()
+        ic.fit(g, weight_method=None)
+        self.assertFalse(ic.predict(0, 3))   
+
+    def test_predict_with_different_ancestor_true(self):
+        g = nx.Graph()
+        g.add_edge(0, 1, weight=2)
+        g.add_edge(1, 2, weight=1.1)
+        g.add_edge(2, 3, weight=1)
+        g.add_edge(3, 4, weight=1)
+        g.add_edge(2, 4, weight=1)
+        ic = info_clustering_prediction()
+        ic.fit(g, weight_method=None)
+        self.assertTrue(ic.predict(0, 2))   
+        self.assertTrue(ic.predict(2, 0))   
+
 if __name__ == '__main__':
     unittest.main()
