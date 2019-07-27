@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{How to use info-clustering to predict whether two author writes the same article}
+\author{zhaofeng-shu33 }
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+In literature \cite{bhcd}, an experiment using nips-authorship data is conducted.
+
+The 234 most connected individuals are used to construct a sub-graph. Some edges are reserved for prediction usage. That is, to test the accuracy whether two author writes the same article.
+
+Info-clustering algorithm can also do the prediction for this task. First we use given edges to construct the hierarchical tree $T$. Then for any given node $(i,j)$, we should make a prediction whether they have an connected edge.
+
+If they are share the same parent in the tree $T$, we test whether the addition of the edge with weight $w$ will split them. To be more specific, we consider the sub-graph consisting of all the sibling of $i,j$. We make an info-clustering on this sub-graph. If the partition is trivial, then we conclude that the connected edge exists. Otherwise, the edge does not exist.
+
+If they do not share the same parent in the tree $T$, we test whether the addition of the edge will join them. The test is bidirectional. Suppose $I$ is the parent node of $i$ and consists of several parts. Consider the sub-graph $I \cup \{j\}$. If the largest critical value becomes larger than before, then there is an edge bewteen $i,j$. Otherwise, consider the other part of the test for $J$ including $j$. If neither of the two tests succeed, we conclude that there is no edge between $i,j$.
+
+\begin{thebibliography}{9}
+\bibitem{bhcd} Bayesian Hierarchical Community Discovery
+
+\end{thebibliography}
+\end{document}

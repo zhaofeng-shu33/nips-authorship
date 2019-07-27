@@ -1,9 +1,11 @@
 import os
+import pdb
+import argparse
 
 import scipy.io
 import numpy as np
 
-
+import networkx as nx
 
 def author_matrix(mat_obj):
     da = np.array(yy['docs_authors'].todense())
@@ -36,11 +38,37 @@ def write_author_matrix_gml(fname, RR, names):
 
 def process_full_data():
     if(os.path.exists('build/nips-full.gml')):
-        return
+        return nx.read_gml(os.path.join('build', 'nips-full.gml'))
     yy = scipy.io.loadmat('build/nips_1-17.mat')
     names = np.squeeze(yy['authors_names'])
     RR=author_matrix(yy)
     write_author_matrix_gml('build/nips-full.gml', RR, names)
-
+    return nx.read_gml(os.path.join('build', 'nips-full.gml'))
+    
+def get_234(net):
+    # restricted the network to the 234 most connected individuals
+    # Parameters
+    # net: nx.Digraph
+    if(os.path.exists('build/nips-234.gml')):
+        return    
+    tmp_list = []
+    try:
+        for i in net.nodes:
+            tmp_list.append([i, net.degree(i, weight='weight')])
+    except Exception as e:
+        pdb.set_trace()
+    tmp_list.sort(key=lambda x:x[1], reverse=True)
+    node_list = []
+    for i in range(234):
+        node_list.append(tmp_list[i][0])
+    sub = net.subgraph(node_list)
+    nx.write_gml(sub, os.path.join('build', 'nips-234.gml'))
+    
 if __name__ == '__main__':
-    process_full_data()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
+    args = parser.parse_args()
+    if(args.debug):
+        pdb.set_trace()
+    net = process_full_data()
+    get_234(net)
