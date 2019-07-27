@@ -17,7 +17,7 @@ except ImportError:
 
 from ete3 import Tree
 try:
-    from ete3 import TreeStyle, NodeStyle # need `conda install pyqt=4.11.4`
+    from ete3 import TreeStyle, NodeStyle # need `pip install pyqt5`
 except ImportError:
     pass
 
@@ -200,6 +200,14 @@ def graph_plot(G):
         g.edge(str(i), str(j), weight=str(weight_value), penwidth="0.3", len=str(edge_len), color=edge_color)    
     g.save(directory='build')    
 
+def save_tree_txt(tree, alg_name):
+    tree_txt = tree.write()
+    time_str = datetime.now().strftime('%Y-%m-%d-')    
+    
+    write_file_name = os.path.join('build', time_str + '_' + alg_name + '_tree.nw')
+    with open(write_file_name, 'w') as f:
+        f.write(time_str)
+    
 class InfoClusterWrapper(InfoCluster):
     def __init__(self):
         super().__init__(affinity='precomputed')
@@ -221,7 +229,7 @@ if __name__ == '__main__':
     parser.add_argument('--plot_graph', default=False, type=bool, nargs='?', const=True, help='whether to save the .gv file') 
     parser.add_argument('--save_graph', default=0, type=int, help='whether to save gml file, =0 not save(default), =1 save complete, =2 save without attribute')
     parser.add_argument('--load_graph', help='use gml file to initialize the graph')     
-    parser.add_argument('--save_tree', default=0, type=int, nargs='?', const=1, help='whether to save the clustering tree pdf file after clustering, =0 not save, =1 save original, =2 save simplified')     
+    parser.add_argument('--save_tree', default=0, type=int, help='whether to save the clustering tree file after clustering, =0 not save, =1 save original(pdf), =2 save simplified(pdf), =3 save ete format txt')     
     parser.add_argument('--alg', default='all', choices=method_chocies, help='which algorithm to run', nargs='+')
     parser.add_argument('--weight', default='triangle-power', help='for info-clustering method, the edge weight shold be used. This parameters'
         ' specifies how to modify the edge weight.')    
@@ -269,4 +277,7 @@ if __name__ == '__main__':
     if(args.save_tree):
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
-            plot_clustering_tree(method.tree, alg_name, args.save_tree - 1)
+            if(args.save_tree == 3):
+                save_tree_txt(method.tree, alg_name)
+            else:
+                plot_clustering_tree(method.tree, alg_name, args.save_tree - 1)
