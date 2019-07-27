@@ -22,6 +22,7 @@ def author_matrix():
 def write_gml(fname, RR, names):
     with open(fname, 'w') as out:
         out.write('graph [\n\tsparse 0\n')
+        out.write('directed 1\n')
         for x in range(len(names)):
             if sum(RR[x,:]) > 0:
                 out.write('\tnode [ id %d label "%s" ]\n' % (x, names[x][0]))

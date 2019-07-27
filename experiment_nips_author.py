@@ -34,7 +34,6 @@ shape_list = ['sphere', 'circle', 'sphere', 'sphere']
 def plot_clustering_tree(tree, alg_name, cutting=0):
     '''if cutting=True, merge the n nodes at leaf nodes with the same parent.
     '''
-    global n,k1
     if(cutting):
         tree_inner = tree.copy()
         cnt = 0
@@ -60,34 +59,18 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
     else: 
         tree_inner = tree
 
-    for _n in tree_inner:
-        try:
-            _n.macro
-            break
-        except AttributeError:        
-            macro_index = int(_n.name) // (n * k1)
-            micro_index = (int(_n.name) - macro_index * n * k1) // n 
-            _n.macro = macro_index
-            _n.micro = micro_index
-            if(len(_n.name)>3):
-                _n.name = str(_n.category)
         
     ts = TreeStyle()
     ts.rotation = 90
     ts.show_scale = False
-    for _n in tree_inner:
-        nstyle = NodeStyle()
-        nstyle['fgcolor'] = color_list[int(_n.macro)]
-        nstyle['shape'] = shape_list[int(_n.micro)]
-        _n.set_style(nstyle)
+    # for _n in tree_inner:
+        # nstyle = NodeStyle()
+        # nstyle['fgcolor'] = color_list[int(_n.macro)]
+        # nstyle['shape'] = shape_list[int(_n.micro)]
+        # _n.set_style(nstyle)
     time_str = datetime.now().strftime('%Y-%m-%d-')    
     tree_inner.render(os.path.join('build', time_str + 'tree.pdf'.replace('.pdf', '_' + alg_name + '.pdf')), tree_style=ts)
     
-def add_category_info(G, tree):
-    for n in tree:
-        macro_index = G.nodes[int(n.name)]['macro']
-        micro_index = G.nodes[int(n.name)]['micro']        
-        n.add_features(macro=macro_index, micro=micro_index)
 
 def evaluate_single(alg, G):
     alg.fit(G)    
@@ -242,19 +225,12 @@ if __name__ == '__main__':
     parser.add_argument('--alg', default='all', choices=method_chocies, help='which algorithm to run', nargs='+')
     parser.add_argument('--weight', default='triangle-power', help='for info-clustering method, the edge weight shold be used. This parameters'
         ' specifies how to modify the edge weight.')    
-    parser.add_argument('--z_in_1', default=14.0, type=float, help='inter-micro-community node average degree')      
-    parser.add_argument('--z_in_2', default=3.0, type=float, help='intra-micro-community node average degree')          
-    parser.add_argument('--z_o', default=-1, type=float, help='intra-macro-community node average degree')              
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
-    parser.add_argument('--evaluate', default=0, type=int, help='whether to evaluate the method instead of run once')                      
+    parser.add_argument('--evaluate', default=2, type=int, help='when evaluate=1, evaluate the method using norm rf = 2; when evaluate=2, compare with ground truth; evaluate=0, no evaluation.')                      
     args = parser.parse_args()
     method_chocies.pop()
     if(args.debug):
         pdb.set_trace()
-    if(args.z_o == -1):
-        z_o = K - args.z_in_1 - args.z_in_2
-    else:
-        z_o = args.z_o
     if(args.load_graph):
         G = nx.read_gml(os.path.join('build', args.load_graph))
     else:
@@ -276,17 +252,21 @@ if __name__ == '__main__':
     if(len(methods)==0):
         raise ValueError('unknown algorithm')
     
-    if(args.evaluate > 0):
+    if(args.evaluate == 2):
         print('logging to', LOGGING_FILE)
         for method in methods:
             report = evaluate(args.evaluate, method, args.z_in_1, args.z_in_2, z_o)
             logging.info('final report' + json.dumps(report))
-    else:
+    elif(args.evaluate == 1):
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
             print('running ' + alg_name)
             dis = evaluate_single(method, G)            
-            print('tree distance is', dis)            
-            if(args.save_tree):
-                add_category_info(G, method.tree)
-                plot_clustering_tree(method.tree, alg_name, args.save_tree - 1)
+            print('tree distance is', dis)           
+    else:
+        for method in methods:
+            method.fit(G)
+    if(args.save_tree):
+        for i, method in enumerate(methods):
+            alg_name = args.alg[i]
+            plot_clustering_tree(method.tree, alg_name, args.save_tree - 1)
