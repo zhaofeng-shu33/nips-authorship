@@ -55,17 +55,22 @@ def get_234(net):
     # net: nx.Digraph
     if(os.path.exists('build/nips-234.gml')):
         return    
+    node_list = ['1']
+    sub = net
+    while(len(node_list)>0 and len(sub) > 300):
+        node_list = []
+        for i in sub.nodes:
+            if(sub.degree(i) > 8):
+                node_list.append(i)
+        sub = sub.subgraph(node_list)
     tmp_list = []
-    try:
-        for i in net.nodes:
-            tmp_list.append([i, net.degree(i, weight='weight')])
-    except Exception as e:
-        pdb.set_trace()
+    for i in sub.nodes:
+        tmp_list.append([i, sub.degree(i, weight='weight')])
     tmp_list.sort(key=lambda x:x[1], reverse=True)
     node_list = []
     for i in range(234):
         node_list.append(tmp_list[i][0])
-    sub = net.subgraph(node_list)
+    sub = sub.subgraph(node_list)    
     nx.write_gml(sub, os.path.join('build', 'nips-234.gml'))
 
 def graph_plot(G):
