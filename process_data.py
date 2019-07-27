@@ -1,10 +1,11 @@
+import os
 
 import scipy.io
 import numpy as np
 
-yy = scipy.io.loadmat('build/nips_1-17.mat')
 
-def author_matrix():
+
+def author_matrix(mat_obj):
     da = np.array(yy['docs_authors'].todense())
     num_docs, num_authors = da.shape
     adj = np.zeros((num_authors, num_authors))
@@ -19,7 +20,7 @@ def author_matrix():
                 adj[other, author] = 1
     return adj
 
-def write_gml(fname, RR, names):
+def write_author_matrix_gml(fname, RR, names):
     with open(fname, 'w') as out:
         out.write('graph [\n\tsparse 0\n')
         out.write('directed 1\n')
@@ -33,7 +34,13 @@ def write_gml(fname, RR, names):
                 ))
         out.write(']\n')
 
-names = np.squeeze(yy['authors_names'])
-RR=author_matrix()
-write_gml('build/nips-full.gml', RR, names)
+def process_full_data():
+    if(os.path.exists('build/nips-full.gml')):
+        return
+    yy = scipy.io.loadmat('build/nips_1-17.mat')
+    names = np.squeeze(yy['authors_names'])
+    RR=author_matrix(yy)
+    write_author_matrix_gml('build/nips-full.gml', RR, names)
 
+if __name__ == '__main__':
+    process_full_data()
