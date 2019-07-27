@@ -1,11 +1,13 @@
 import os
 import pdb
 import argparse
+from datetime import datetime
 
 import scipy.io
 import numpy as np
 
 import networkx as nx
+import graphviz
 
 def author_matrix(mat_obj):
     da = np.array(yy['docs_authors'].todense())
@@ -39,6 +41,8 @@ def write_author_matrix_gml(fname, RR, names):
 def process_full_data():
     if(os.path.exists('build/nips-full.gml')):
         return nx.read_gml(os.path.join('build', 'nips-full.gml'))
+    if not(os.path.exists('build/nips_1-17.mat')):
+        raise FileNotFoundError('You need to download nips_1-17.mat first (See README for detail)')
     yy = scipy.io.loadmat('build/nips_1-17.mat')
     names = np.squeeze(yy['authors_names'])
     RR=author_matrix(yy)
@@ -63,12 +67,34 @@ def get_234(net):
         node_list.append(tmp_list[i][0])
     sub = net.subgraph(node_list)
     nx.write_gml(sub, os.path.join('build', 'nips-234.gml'))
+
+def graph_plot(G):
+    '''
+    generate the plot file which is the input of graphviz.
+    G: networkx graph object
+    '''
+    time_str = datetime.now().strftime('%Y-%m-%d')
+    g = graphviz.Graph(filename='nips-234-%s.gv'%time_str, engine='neato') # g is used for plotting
+    for i in G.nodes(data=True):
+        g.node(str(i[0]), shape='point')
+    for e in nx.edges(G):
+        i,j = e
+        if(i < j):
+            g.edge(str(i), str(j), penwidth="0.3")    
+    g.save(directory='build')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
+    parser.add_argument('--command', default="generate_data", choices=["generate_data", "plot_graph"])                      
     args = parser.parse_args()
     if(args.debug):
         pdb.set_trace()
-    net = process_full_data()
-    get_234(net)
+    if(args.command == 'generate_data'):
+        net = process_full_data()    
+        get_234(net)
+    elif(args.command == 'plot_graph'):
+        if not(os.path.exists('build/nips-234.gml')):
+            raise FileNotFoundError('You need to invoke generate_data command first')
+        G = nx.read_gml(os.path.join('build', 'nips-234.gml'))
+        graph_plot(G)

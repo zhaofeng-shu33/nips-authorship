@@ -168,37 +168,6 @@ def write_gml_wrapper(G, filename, ignore_attr=False):
         info_clustering_add_weight(_G)
     nx.write_gml(_G, filename)
         
-def graph_plot(G):
-    '''
-    generate the plot file which is the input of graphviz.
-    G: networkx graph object
-    '''
-    global n, k1, k2
-    time_str = datetime.now().strftime('%Y-%m-%d')
-    write_gml_wrapper(G, os.path.join('build', 'two_level-%s.gml'%time_str))
-    g = graphviz.Graph(filename='two_level-%s.gv'%time_str, engine='neato') # g is used for plotting
-    for i in G.nodes(data=True):
-        macro_index = i[1]['macro']
-        g.node(str(i[0]), shape='point', color=color_list[macro_index])
-    for e in nx.edges(G):
-        i,j = e
-        i_attr = G.node[i]
-        j_attr = G.node[j]
-        if(i_attr['macro'] != j_attr['macro']):
-            edge_len = 2
-            weight_value = 0.1
-            edge_color = 'black'
-        elif(i_attr['micro'] != j_attr['micro']):
-            weight_value = 1
-            edge_len = 1
-            edge_color = 'black'
-        else:
-            weight_value = 10
-            edge_len = 0.5
-            macro_index = i_attr['macro']
-            edge_color = color_list[macro_index]
-        g.edge(str(i), str(j), weight=str(weight_value), penwidth="0.3", len=str(edge_len), color=edge_color)    
-    g.save(directory='build')    
 
 def save_tree_txt(tree, alg_name):
     tree_txt = tree.write()
@@ -226,7 +195,6 @@ class InfoClusterWrapper(InfoCluster):
 if __name__ == '__main__':
     method_chocies = ['info-clustering', 'gn', 'bhcd', 'all']
     parser = argparse.ArgumentParser()
-    parser.add_argument('--plot_graph', default=False, type=bool, nargs='?', const=True, help='whether to save the .gv file') 
     parser.add_argument('--save_graph', default=0, type=int, help='whether to save gml file, =0 not save(default), =1 save complete, =2 save without attribute')
     parser.add_argument('--load_graph', help='use gml file to initialize the graph')     
     parser.add_argument('--save_tree', default=0, type=int, help='whether to save the clustering tree file after clustering, =0 not save, =1 save original(pdf), =2 save simplified(pdf), =3 save ete format txt')     
