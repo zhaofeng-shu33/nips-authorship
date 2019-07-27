@@ -141,17 +141,7 @@ def construct(z_in_1, z_in_2, z_out):
                         G.add_edge(i[0], j[0])
     return G    
 
-def info_clustering_add_weight(G):
-    # G is modified within this function
-    # for each edge, the weight equals the number of triangles + beta(default to 1)    
-    beta = 1
-    for e in G.edges():
-        i, j = e
-        G[i][j]['weight'] = beta
-        for n in G.nodes():
-            if(G[i].get(n) is not None and G[j].get(n) is not None):
-                G[i][j]['weight'] += 1
-        G[i][j]['weight'] = G[i][j]['weight']
+
         
 def write_gml_wrapper(G, filename, ignore_attr=False):
     if(ignore_attr):

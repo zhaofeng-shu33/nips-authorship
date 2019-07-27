@@ -1,0 +1,40 @@
+import unittest
+
+import networkx as nx
+
+from info_cluster import InfoCluster
+from ic_prediction import info_clustering_prediction
+
+class TestIcPrediction(unittest.TestCase):
+    def test_cv_value(self):
+        g = nx.Graph() # undirected graph
+        g.add_edge(0, 1, weight=1)
+        g.add_edge(1, 2, weight=1)
+        g.add_edge(0, 2, weight=5)
+        ic = InfoCluster(affinity='precomputed') # use precomputed graph structure
+        ic.fit(g)
+        self.assertAlmostEqual(ic.tree.cv, 2.0)
+        self.assertAlmostEqual(ic.tree.get_children()[0].cv, 5.0)
+        
+    def test_predict_trivial(self):
+        g = nx.Graph() # undirected graph
+        g.add_edge(0, 1, weight=1)
+        ic = info_clustering_prediction()
+        ic.fit(g)
+        self.assertTrue(ic.predict(0, 1))
+        self.assertTrue(ic.predict(1, 0))
+    
+    def test_predict_with_same_ancestor(self):
+        g = nx.Graph()
+        g.add_edge(0, 1, weight=1)
+        g.add_edge(1, 2, weight=1)
+        g.add_edge(2, 3, weight=1)
+        ic = info_clustering_prediction()
+        ic.fit(g)
+        self.assertTrue(ic.predict(0, 3))   
+        self.assertTrue(ic.predict(3, 0))   
+        self.assertFalse(ic.predict(0, 2))   
+        self.assertFalse(ic.predict(2, 0))   
+        
+if __name__ == '__main__':
+    unittest.main()
