@@ -206,7 +206,7 @@ def save_tree_txt(tree, alg_name):
     
     write_file_name = os.path.join('build', time_str + '_' + alg_name + '_tree.nw')
     with open(write_file_name, 'w') as f:
-        f.write(time_str)
+        f.write(tree_txt)
     
 class InfoClusterWrapper(InfoCluster):
     def __init__(self):
