@@ -49,28 +49,27 @@ def process_full_data():
     write_author_matrix_gml('build/nips-full.gml', RR, names)
     return nx.read_gml(os.path.join('build', 'nips-full.gml'))
     
-def get_234(net):
+def get_234(net, overwrite):
     # restricted the network to the 234 most connected individuals
     # Parameters
     # net: nx.Digraph
-    if(os.path.exists('build/nips-234.gml')):
+    if(not overwrite and os.path.exists('build/nips-234.gml')):
         return    
     node_list = ['1']
     sub = net
-    while(len(node_list)>0 and len(sub) > 300):
+    max_iteration = 10
+    iter_cnt = 0
+    while(len(node_list)>0 and iter_cnt < max_iteration):
         node_list = []
         for i in sub.nodes:
             if(sub.degree(i) > 8):
                 node_list.append(i)
         sub = sub.subgraph(node_list)
+        iter_cnt += 1
     tmp_list = []
     for i in sub.nodes:
         tmp_list.append([i, sub.degree(i, weight='weight')])
     tmp_list.sort(key=lambda x:x[1], reverse=True)
-    node_list = []
-    for i in range(234):
-        node_list.append(tmp_list[i][0])
-    sub = sub.subgraph(node_list)
     # ensure the node name are integer    
     nx.write_gml(nx.convert_node_labels_to_integers(sub).to_undirected(), os.path.join('build', 'nips-234.gml'))
 
@@ -85,20 +84,20 @@ def graph_plot(G):
         g.node(str(i[0]), shape='point')
     for e in nx.edges(G):
         i,j = e
-        if(i < j):
-            g.edge(str(i), str(j), penwidth="0.3")    
+        g.edge(str(i), str(j), penwidth="0.3")    
     g.save(directory='build')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
+    parser.add_argument('--overwrite', help='whether to overwrite the nips-234.gml file', type=bool, default=False, nargs='?', const=True)
     parser.add_argument('--command', default="generate_data", choices=["generate_data", "plot_graph"])                      
     args = parser.parse_args()
     if(args.debug):
         pdb.set_trace()
     if(args.command == 'generate_data'):
         net = process_full_data()    
-        get_234(net)
+        get_234(net, args.overwrite)
     elif(args.command == 'plot_graph'):
         if not(os.path.exists('build/nips-234.gml')):
             raise FileNotFoundError('You need to invoke generate_data command first')
