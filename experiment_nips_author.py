@@ -11,6 +11,10 @@ import json
 import numpy as np
 import networkx as nx # for manipulating graph data-structure
 from ete3 import Tree
+try:
+    from ete3 import TreeStyle, NodeStyle
+except ImportError:
+    pass
 from sklearn.model_selection import KFold
 
 from ic_prediction import info_clustering_prediction
@@ -51,16 +55,10 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
         tree_inner = Tree(tree_inner.write(features=[]))
     else: 
         tree_inner = tree
-
         
     ts = TreeStyle()
     ts.rotation = 90
     ts.show_scale = False
-    # for _n in tree_inner:
-        # nstyle = NodeStyle()
-        # nstyle['fgcolor'] = color_list[int(_n.macro)]
-        # nstyle['shape'] = shape_list[int(_n.micro)]
-        # _n.set_style(nstyle)
     time_str = datetime.now().strftime('%Y-%m-%d-')    
     tree_inner.render(os.path.join('build', time_str + 'tree.pdf'.replace('.pdf', '_' + alg_name + '.pdf')), tree_style=ts)
     
@@ -96,27 +94,7 @@ def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
                 'z_in_2': z_in_2,
                 'z_o': z_o})
     return report
-    
-
-
-
-    # average over different cv
-def write_gml_wrapper(G, filename, ignore_attr=False):
-    if(ignore_attr):
-        _G = nx.Graph()
-        for node in G.nodes():
-            _G.add_node(node)
-        for edge in G.edges():
-            i,j = edge
-            _G.add_edge(i,j)
-            
-        # remove the attribute of _G
-    else:
-        _G = G.copy()
-        info_clustering_add_weight(_G)
-    nx.write_gml(_G, filename)
         
-
 def save_tree_txt(tree, alg_name):
     tree_txt = tree.write()
     time_str = datetime.now().strftime('%Y-%m-%d-')    
@@ -129,7 +107,7 @@ def save_tree_txt(tree, alg_name):
 if __name__ == '__main__':
     method_chocies = ['info-clustering', 'gn', 'bhcd', 'all']
     parser = argparse.ArgumentParser()
-    parser.add_argument('--save_graph', default=0, type=int, help='whether to save gml file, =0 not save(default), =1 save complete, =2 save without attribute')
+    parser.add_argument('--save_graph', default=0, type=int, help='whether to save gv file')
     parser.add_argument('--load_graph', help='use custom gml file to initialize the graph')     
     parser.add_argument('--save_tree', default=0, type=int, help='whether to save the clustering tree file after clustering, =0 not save, =1 save original(pdf), =2 save simplified(pdf), =3 save ete format txt')     
     parser.add_argument('--alg', default='all', choices=method_chocies, help='which algorithm to run', nargs='+')
@@ -146,7 +124,7 @@ if __name__ == '__main__':
     else:
         G = nx.read_gml(os.path.join('build', 'nips-234.gml'))    
     if(args.save_graph):
-        write_gml_wrapper(G, 'build/tuning.gml', args.save_graph-1)
+        raise NotImplementedError("")
     methods = []
     if(args.alg.count('all')>0):
         args.alg = method_chocies
