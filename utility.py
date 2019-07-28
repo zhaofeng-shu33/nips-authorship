@@ -22,4 +22,4 @@ def train_test_split(net, ratio = 0.2):
         u, v = edge_list[i]
         test_edge_list.append((int(u), int(v)))
         train_net.remove_edge(u, v)
-    return (train_net, test_edge_list)
+    return (nx.convert_node_labels_to_integers(train_net), test_edge_list)

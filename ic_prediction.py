@@ -51,10 +51,19 @@ class info_clustering_prediction(InfoCluster):
         for ii in range(n_nodes):
             for jj in range(ii+1, n_nodes):
                 affinity_matrix[ii, jj] = self.get_weight(child_node_list[ii], child_node_list[jj])
-        if(node_index_i < node_index_j):           
-            affinity_matrix[node_index_i, node_index_j] = weight_added
+                
+        node_index_ii = -1
+        node_index_jj = -1
+        for ii in range(n_nodes):
+            if(str(node_index_i) == child_node_list[ii].name):
+                node_index_ii = ii
+            if(str(node_index_j) == child_node_list[ii].name):
+                node_index_jj = ii
+            
+        if(node_index_ii < node_index_jj):           
+            affinity_matrix[node_index_ii, node_index_jj] = weight_added
         else:           
-            affinity_matrix[node_index_j, node_index_i] = weight_added
+            affinity_matrix[node_index_jj, node_index_ii] = weight_added
         new_ic = InfoCluster(affinity='precomputed')
         new_ic.fit(affinity_matrix, use_psp_i=True)            
         is_solution_trivial = len(new_ic.critical_values) == 1
