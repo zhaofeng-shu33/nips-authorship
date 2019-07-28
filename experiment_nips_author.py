@@ -14,7 +14,7 @@ from ete3 import Tree
 from sklearn.model_selection import KFold
 
 from info_cluster import InfoCluster
-
+from utility import construct_subgraph
 
 LOGGING_FILE = 'nips_authorship_%d.log'%os.getpid()
 logging.basicConfig(filename=os.path.join('build', LOGGING_FILE), level=logging.INFO, format='%(asctime)s %(message)s')
@@ -64,10 +64,7 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
     tree_inner.render(os.path.join('build', time_str + 'tree.pdf'.replace('.pdf', '_' + alg_name + '.pdf')), tree_style=ts)
     
 
-def evaluate_single(alg, G, test_edge_index_list):
-    alg.fit(G)    
-    res = alg.tree.compare(ground_truth_tree, unrooted=True)
-    return res['norm_rf']
+
     
 def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
     '''
@@ -105,8 +102,8 @@ def train_test_split(alg, net):
     kf = KFold(n_splits=10, random_state=None, shuffle=False)    
     for train_index_list, test_index_list in kf.split(net.edges):
         sub = construct_subgraph(train_index_list)
-        evaluate_single(alg, sub, test_edge_index_list)
-        
+        res = evaluate_single(alg, sub, test_index_list)
+        # average over different cv
 def write_gml_wrapper(G, filename, ignore_attr=False):
     if(ignore_attr):
         _G = nx.Graph()

@@ -4,6 +4,7 @@ import networkx as nx
 
 from info_cluster import InfoCluster
 from ic_prediction import info_clustering_prediction
+from evaluation import evaluate_single
 
 class TestIcPrediction(unittest.TestCase):
     def test_cv_value(self):
@@ -66,6 +67,19 @@ class TestIcPrediction(unittest.TestCase):
         ic.fit(g, weight_method=None)
         self.assertTrue(ic.predict(0, 2))   
         self.assertTrue(ic.predict(2, 0))   
+
+    def test_evaluation_single(self):
+        g = nx.Graph()
+        g.add_edge(0, 1, weight=1)
+        g.add_edge(1, 2, weight=1)
+        g.add_edge(2, 3, weight=1)
+        ic = info_clustering_prediction()        
+        ic.fit(g, weight_method=None)
+        test_index_list = [(0, 3)]
+        res = evaluate_single(ic, test_index_list, need_fit=False)
+        self.assertAlmostEqual(res["tpr"], 1.0)
+        self.assertAlmostEqual(res["tnr"], 1.0)
+        self.assertAlmostEqual(res["acc"], 1.0)
 
 if __name__ == '__main__':
     unittest.main()

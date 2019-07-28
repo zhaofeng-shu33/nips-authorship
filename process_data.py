@@ -70,6 +70,10 @@ def get_234(net, overwrite):
     for i in sub.nodes:
         tmp_list.append([i, sub.degree(i, weight='weight')])
     tmp_list.sort(key=lambda x:x[1], reverse=True)
+    node_list = []
+    for i in range(234):
+        node_list.append(tmp_list[i][0])
+    sub = sub.subgraph(node_list)    
     # ensure the node name are integer    
     nx.write_gml(nx.convert_node_labels_to_integers(sub).to_undirected(), os.path.join('build', 'nips-234.gml'))
 
