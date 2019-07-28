@@ -10,7 +10,7 @@ import networkx as nx
 import graphviz
 
 def author_matrix(mat_obj):
-    da = np.array(yy['docs_authors'].todense())
+    da = np.array(mat_obj['docs_authors'].todense())
     num_docs, num_authors = da.shape
     adj = np.zeros((num_authors, num_authors))
 
@@ -72,7 +72,7 @@ def get_234(net):
         node_list.append(tmp_list[i][0])
     sub = sub.subgraph(node_list)
     # ensure the node name are integer    
-    nx.write_gml(sub.convert_node_labels_to_integers(sub), os.path.join('build', 'nips-234.gml'))
+    nx.write_gml(nx.convert_node_labels_to_integers(sub).to_undirected(), os.path.join('build', 'nips-234.gml'))
 
 def graph_plot(G):
     '''
