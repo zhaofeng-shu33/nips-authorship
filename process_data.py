@@ -70,8 +70,9 @@ def get_234(net):
     node_list = []
     for i in range(234):
         node_list.append(tmp_list[i][0])
-    sub = sub.subgraph(node_list)    
-    nx.write_gml(sub, os.path.join('build', 'nips-234.gml'))
+    sub = sub.subgraph(node_list)
+    # ensure the node name are integer    
+    nx.write_gml(sub.convert_node_labels_to_integers(sub), os.path.join('build', 'nips-234.gml'))
 
 def graph_plot(G):
     '''

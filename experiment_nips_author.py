@@ -10,16 +10,8 @@ import json
 
 import numpy as np
 import networkx as nx # for manipulating graph data-structure
-try:
-    import graphviz # for writing .gv file
-except ImportError:
-    pass
-
 from ete3 import Tree
-try:
-    from ete3 import TreeStyle, NodeStyle # need `pip install pyqt5`
-except ImportError:
-    pass
+from sklearn.model_selection import KFold
 
 from info_cluster import InfoCluster
 
@@ -72,7 +64,7 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
     tree_inner.render(os.path.join('build', time_str + 'tree.pdf'.replace('.pdf', '_' + alg_name + '.pdf')), tree_style=ts)
     
 
-def evaluate_single(alg, G):
+def evaluate_single(alg, G, test_edge_index_list):
     alg.fit(G)    
     res = alg.tree.compare(ground_truth_tree, unrooted=True)
     return res['norm_rf']
@@ -105,43 +97,15 @@ def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
                 'z_o': z_o})
     return report
     
-def construct(z_in_1, z_in_2, z_out):
-    '''
-       p2: type float, percentage of edges to be added at macro level.
-       p1: type float, percentage of edges to be added at micro level.
-    '''
-    global n,k1,k2
-    p_1 = z_in_1/(n-1)
-    
-    assert(p_1 <= 1)
-    assert(z_out > 0)
-    
-    p_2 = z_in_2/(n*(k1-1))
-    p_o = z_out/(n*k1*(k2-1))
-    G = nx.Graph()
-    cnt = 0
-    for t in range(k2):
-        for i in range(k1):
-            for j in range(n):
-                G.add_node(cnt, macro=t, micro=i)
-                cnt += 1
-    for i in G.nodes(data=True):
-        for j in G.nodes(data=True):
-            if(j[0] <= i[0]):
-                continue
-            if(i[1]['macro'] != j[1]['macro']):
-                if(random.random()<=p_o):
-                    G.add_edge(i[0], j[0])
-            else:
-                if(i[1]['micro'] == j[1]['micro']):
-                    if(random.random() <= p_1):
-                        G.add_edge(i[0], j[0])
-                else:
-                    if(random.random() <= p_2):
-                        G.add_edge(i[0], j[0])
-    return G    
 
-
+def train_test_split(alg, net):
+    # split the edges into train and test set
+    # return (train_set, test_set)
+    # train_set or test_set is the collection of edges
+    kf = KFold(n_splits=10, random_state=None, shuffle=False)    
+    for train_index_list, test_index_list in kf.split(net.edges):
+        sub = construct_subgraph(train_index_list)
+        evaluate_single(alg, sub, test_edge_index_list)
         
 def write_gml_wrapper(G, filename, ignore_attr=False):
     if(ignore_attr):
