@@ -1,10 +1,12 @@
 import unittest
 
+import numpy as np
 import networkx as nx
 
 from info_cluster import InfoCluster
 from ic_prediction import info_clustering_prediction
 from evaluation import evaluate_single
+from utility import train_test_split
 
 class TestIcPrediction(unittest.TestCase):
     def test_cv_value(self):
@@ -80,6 +82,18 @@ class TestIcPrediction(unittest.TestCase):
         self.assertAlmostEqual(res["tpr"], 1.0)
         self.assertAlmostEqual(res["tnr"], 1.0)
         self.assertAlmostEqual(res["acc"], 1.0)
+
+    def test_train_test_split(self):
+        g = nx.Graph()
+        g.add_edge(0, 1, weight=1)
+        g.add_edge(1, 2, weight=1)
+        g.add_edge(2, 3, weight=1)
+        g.add_edge(3, 0, weight=1)
+        g.add_edge(3, 1, weight=1)
+        np.random.seed(0)
+        new_g, test_edge_list = train_test_split(g)
+        self.assertEqual(len(new_g.edges), 4)
+        self.assertEqual(test_edge_list, [(1, 2)])
 
 if __name__ == '__main__':
     unittest.main()

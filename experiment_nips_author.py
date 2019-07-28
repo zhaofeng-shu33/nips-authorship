@@ -14,7 +14,8 @@ from ete3 import Tree
 from sklearn.model_selection import KFold
 
 from info_cluster import InfoCluster
-from utility import construct_subgraph
+from utility import construct_subgraph, train_test_split
+from evaluation import evaluate_single
 
 LOGGING_FILE = 'nips_authorship_%d.log'%os.getpid()
 logging.basicConfig(filename=os.path.join('build', LOGGING_FILE), level=logging.INFO, format='%(asctime)s %(message)s')
@@ -64,8 +65,10 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
     tree_inner.render(os.path.join('build', time_str + 'tree.pdf'.replace('.pdf', '_' + alg_name + '.pdf')), tree_style=ts)
     
 
+def evaluate_single_wrapper(alg, G):
+    new_g, test_edge_list = train_test_split(G)
+    return evaluate_single(alg, test_edge_list, new_g)
 
-    
 def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
     '''
         num_times: int
@@ -95,15 +98,9 @@ def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
     return report
     
 
-def train_test_split(alg, net):
-    # split the edges into train and test set
-    # return (train_set, test_set)
-    # train_set or test_set is the collection of edges
-    kf = KFold(n_splits=10, random_state=None, shuffle=False)    
-    for train_index_list, test_index_list in kf.split(net.edges):
-        sub = construct_subgraph(train_index_list)
-        res = evaluate_single(alg, sub, test_index_list)
-        # average over different cv
+
+
+    # average over different cv
 def write_gml_wrapper(G, filename, ignore_attr=False):
     if(ignore_attr):
         _G = nx.Graph()
@@ -147,13 +144,13 @@ if __name__ == '__main__':
     method_chocies = ['info-clustering', 'gn', 'bhcd', 'all']
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_graph', default=0, type=int, help='whether to save gml file, =0 not save(default), =1 save complete, =2 save without attribute')
-    parser.add_argument('--load_graph', help='use gml file to initialize the graph')     
+    parser.add_argument('--load_graph', help='use custom gml file to initialize the graph')     
     parser.add_argument('--save_tree', default=0, type=int, help='whether to save the clustering tree file after clustering, =0 not save, =1 save original(pdf), =2 save simplified(pdf), =3 save ete format txt')     
     parser.add_argument('--alg', default='all', choices=method_chocies, help='which algorithm to run', nargs='+')
     parser.add_argument('--weight', default='triangle-power', help='for info-clustering method, the edge weight shold be used. This parameters'
         ' specifies how to modify the edge weight.')    
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
-    parser.add_argument('--evaluate', default=2, type=int, help='when evaluate=1, evaluate the method using norm rf = 2; when evaluate=2, compare with ground truth; evaluate=0, no evaluation.')                      
+    parser.add_argument('--evaluate', default=2, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')                      
     args = parser.parse_args()
     method_chocies.pop()
     if(args.debug):
@@ -161,7 +158,7 @@ if __name__ == '__main__':
     if(args.load_graph):
         G = nx.read_gml(os.path.join('build', args.load_graph))
     else:
-        G = construct(args.z_in_1, args.z_in_2, z_o)    
+        G = nx.read_gml(os.path.join('build', 'nips-234.gml'))    
     if(args.plot_graph):
         graph_plot(G)
     if(args.save_graph):
@@ -188,8 +185,8 @@ if __name__ == '__main__':
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
             print('running ' + alg_name)
-            dis = evaluate_single(method, G)            
-            print('tree distance is', dis)           
+            res = evaluate_single_wrapper(method, G)            
+            print('evaluation result for ', alg_name, res)           
     else:
         for method in methods:
             method.fit(G)

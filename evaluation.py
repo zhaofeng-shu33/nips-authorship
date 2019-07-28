@@ -2,6 +2,8 @@
 def evaluate_single(alg, test_edge_index_list, G=None, need_fit=True):
     # first fit if needed
     if(need_fit):
+        if(G is None):
+            raise AttributeError("input graph is None")
         alg.fit(G)    
     if(G is None):
         G = alg.G
