@@ -20,6 +20,6 @@ def train_test_split(net, ratio = 0.2):
         edge_list.append(i)
     for i in test_index:
         u, v = edge_list[i]
-        test_edge_list.append((u, v))
+        test_edge_list.append((int(u), int(v)))
         train_net.remove_edge(u, v)
     return (train_net, test_edge_list)

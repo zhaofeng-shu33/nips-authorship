@@ -13,11 +13,11 @@ import networkx as nx # for manipulating graph data-structure
 from ete3 import Tree
 from sklearn.model_selection import KFold
 
-from info_cluster import InfoCluster
+from ic_prediction import info_clustering_prediction
 from utility import construct_subgraph, train_test_split
 from evaluation import evaluate_single
 
-LOGGING_FILE = 'nips_authorship_%d.log'%os.getpid()
+LOGGING_FILE = 'nips_authorship.log'
 logging.basicConfig(filename=os.path.join('build', LOGGING_FILE), level=logging.INFO, format='%(asctime)s %(message)s')
 
 color_list = ['red', 'orange', 'green', 'purple']
@@ -124,21 +124,7 @@ def save_tree_txt(tree, alg_name):
     write_file_name = os.path.join('build', time_str + '_' + alg_name + '_tree.nw')
     with open(write_file_name, 'w') as f:
         f.write(tree_txt)
-    
-class InfoClusterWrapper(InfoCluster):
-    def __init__(self):
-        super().__init__(affinity='precomputed')
-    def fit(self, _G, weight_method='triangle-power'):
-        G = _G.copy()
-        if(weight_method=='triangle-power'):            
-            info_clustering_add_weight(G)
-        try:
-            super().fit(G, use_psp_i=True)
-        except RuntimeError as e:
-            print(e)
-            # dump the graph
-            print('internal error of the pdt algorithm, graph dumped to build/graph_dump.gml')
-            nx.write_gml(_G, os.path.join('build', 'graph_dump.gml'))
+
             
 if __name__ == '__main__':
     method_chocies = ['info-clustering', 'gn', 'bhcd', 'all']
@@ -150,7 +136,7 @@ if __name__ == '__main__':
     parser.add_argument('--weight', default='triangle-power', help='for info-clustering method, the edge weight shold be used. This parameters'
         ' specifies how to modify the edge weight.')    
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
-    parser.add_argument('--evaluate', default=2, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')                      
+    parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')                      
     args = parser.parse_args()
     method_chocies.pop()
     if(args.debug):
@@ -159,15 +145,13 @@ if __name__ == '__main__':
         G = nx.read_gml(os.path.join('build', args.load_graph))
     else:
         G = nx.read_gml(os.path.join('build', 'nips-234.gml'))    
-    if(args.plot_graph):
-        graph_plot(G)
     if(args.save_graph):
         write_gml_wrapper(G, 'build/tuning.gml', args.save_graph-1)
     methods = []
     if(args.alg.count('all')>0):
         args.alg = method_chocies
     if(args.alg.count('info-clustering')>0):
-        methods.append(InfoClusterWrapper())
+        methods.append(info_clustering_prediction())
     if(args.alg.count('gn')>0):
         methods.append(GN())
     if(args.alg.count('bhcd')>0):
