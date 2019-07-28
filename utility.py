@@ -1,12 +1,6 @@
 import numpy as np
 import networkx as nx
 
-def construct_subgraph(index_list):
-    g = nx.Graph()
-    for i,j in index_list:
-        g.add_edge(i, j)
-    return g
-
 def train_test_split(net, ratio = 0.2):
     # split the edges into train and test set
     # return (train_net, test_edge_list)

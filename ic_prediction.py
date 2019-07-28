@@ -24,7 +24,7 @@ class info_clustering_prediction(InfoCluster):
     def __init__(self):
         super().__init__(affinity='precomputed')
         
-    def fit(self, _G, weight_method='triangle-power'):
+    def fit(self, _G, weight_method=None):
         if not(type(_G) is nx.Graph):
             raise ValueError("input graph should be an instance of networkx.Graph")
         self.G = _G.copy()
@@ -51,7 +51,7 @@ class info_clustering_prediction(InfoCluster):
         for ii in range(n_nodes):
             for jj in range(ii+1, n_nodes):
                 affinity_matrix[ii, jj] = self.get_weight(child_node_list[ii], child_node_list[jj])
-                
+
         node_index_ii = -1
         node_index_jj = -1
         for ii in range(n_nodes):

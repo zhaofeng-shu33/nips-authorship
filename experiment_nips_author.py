@@ -18,7 +18,7 @@ except ImportError:
 from sklearn.model_selection import KFold
 
 from ic_prediction import info_clustering_prediction
-from utility import construct_subgraph, train_test_split
+from utility import train_test_split
 from evaluation import evaluate_single
 
 LOGGING_FILE = 'nips_authorship.log'

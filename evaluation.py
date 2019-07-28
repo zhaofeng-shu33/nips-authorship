@@ -11,7 +11,8 @@ def evaluate_single(alg, test_edge_index_list, G=None, need_fit=True):
     # get tpr
     tp = 0
     for i, j in test_edge_index_list:
-        tp += alg.predict(i, j)
+        r = alg.predict(i, j)
+        tp += r
     total_positive_sample = len(test_edge_index_list)
     tpr = tp / total_positive_sample
     # get tnr
