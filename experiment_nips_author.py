@@ -60,7 +60,7 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
     ts.rotation = 90
     ts.show_scale = False
     time_str = datetime.now().strftime('%Y-%m-%d-')    
-    tree_inner.render(os.path.join('build', time_str + 'tree.pdf'.replace('.pdf', '_' + alg_name + '.pdf')), tree_style=ts)
+    tree_inner.render(os.path.join('build', time_str + alg_name + '.pdf'), tree_style=ts)
     
 
 def evaluate_single_wrapper(alg, G):
