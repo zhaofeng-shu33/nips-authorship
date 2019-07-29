@@ -17,6 +17,8 @@ except ImportError:
     pass
 from sklearn.model_selection import KFold
 
+from bhcd import BHCD # install bhcd inplace from ../community_detection/bhcd/
+
 from ic_prediction import info_clustering_prediction
 from utility import train_test_split
 from evaluation import evaluate_single
@@ -131,8 +133,7 @@ if __name__ == '__main__':
     if(args.alg.count('info-clustering')>0):
         methods.append(info_clustering_prediction())
     if(args.alg.count('bhcd')>0):
-        methods.append(BHCD(restart=bhcd_parameter.restart, 
-            gamma=bhcd_parameter.gamma, _lambda=bhcd_parameter._lambda, delta=bhcd_parameter.delta))
+        methods.append(BHCD())
     if(len(methods)==0):
         raise ValueError('unknown algorithm')
     
