@@ -16,6 +16,7 @@ try:
 except ImportError:
     pass
 from sklearn.model_selection import KFold
+from tabulate import tabulate
 
 from bhcd import BHCD # install bhcd inplace from ../community_detection/bhcd/
 
@@ -64,6 +65,24 @@ def plot_clustering_tree(tree, alg_name, cutting=0):
     time_str = datetime.now().strftime('%Y-%m-%d-')    
     tree_inner.render(os.path.join('build', time_str + alg_name + '.pdf'), tree_style=ts)
     
+def make_table(dic, tb_name, format='latex_raw'):
+    table = [[] for i in range(len(dic.keys()))]
+    for index, method_name in enumerate(dic.keys()):
+        table[index].append(method_name)
+        v = dic[method_name]
+        tpr, tnr, acc = v['tpr'], v['tnr'], v['acc']
+        table[index].extend(['%.3f\\%%'%(100*tpr), '%.3f\\%%'%(100*tnr), '%.3f\\%%'%(100*acc)])
+    _headers = ['Method', 'TPR', 'TNR', 'ACC']
+    align_list = ['center' for i in range(len(_headers))]
+    table_string = tabulate(table, headers = _headers, tablefmt = format, floatfmt='.3f', colalign=align_list)
+        
+    if(format == 'latex_raw'):
+        table_suffix = '.tex'
+    elif(format == 'html'):
+        table_suffix = '.html'
+        
+    with open(os.path.join('build', tb_name + table_suffix),'w') as f: 
+        f.write(table_string)
 
 def evaluate_single_wrapper(alg, G):
     new_g, test_edge_list = train_test_split(G)
@@ -128,20 +147,23 @@ if __name__ == '__main__':
     if(args.save_graph):
         raise NotImplementedError("")
     methods = []
-    if(args.alg.count('all')>0):
+    if(args.alg.count('all') > 0):
         args.alg = method_chocies
-    if(args.alg.count('info-clustering')>0):
+    if(args.alg.count('info-clustering') > 0):
         methods.append(info_clustering_prediction())
-    if(args.alg.count('bhcd')>0):
+    if(args.alg.count('bhcd') > 0):
         methods.append(BHCD())
     if(len(methods)==0):
         raise ValueError('unknown algorithm')
     
     if(args.evaluate == 2):
         print('logging to', LOGGING_FILE)
-        for method in methods:
+        tabulate_dic = {}
+        for i, method in enumerate(methods):
             report = evaluate(args.num_times, method, G)
+            tabulate_dic[args.alg[i]] = report
             logging.info('final report' + json.dumps(report))
+        make_table(tabulate_dic, 'compare')
     elif(args.evaluate == 1):
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
