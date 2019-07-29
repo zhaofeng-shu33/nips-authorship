@@ -67,7 +67,7 @@ def evaluate_single_wrapper(alg, G):
     new_g, test_edge_list = train_test_split(G)
     return evaluate_single(alg, test_edge_list, new_g)
 
-def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
+def evaluate(num_times, alg, G):
     '''
         num_times: int
         alg: algorithm class
@@ -78,21 +78,20 @@ def evaluate(num_times, alg, z_in_1, z_in_2, z_o):
         the evaluated alg is a class, and should provide fit method , which operates on similarity matrix
         and get_category(i) method, where i is the specified category.
     '''
-    report = {'norm_rf' : 0,
-             }
-    assert(z_in_1 > z_in_2 and z_in_2 > z_o)
-    logging.info('eval ' + str(type(alg)) + ' num_times=%d, z_in_1=%f,z_in_2=%f, z_o=%f'%(num_times, z_in_1, z_in_2, z_o))
+    report = {
+        "tpr": 0,
+        "tnr": 0,
+        "acc": 0
+    }
+    
+    logging.info('eval ' + str(type(alg)) + ' num_times=%d'%(num_times))
     for i in range(num_times):
-        G = construct(z_in_1, z_in_2, z_o)
-        norm_rf = evaluate_single(alg, G)
-        logging.info('round {0}: with norm_rf={1}'.format(i, norm_rf))
-        report['norm_rf'] += norm_rf
-    report['norm_rf'] /= num_times
-    report.update({
-                'num_times': num_times,
-                'z_in_1': z_in_1,
-                'z_in_2': z_in_2,
-                'z_o': z_o})
+        res = evaluate_single_wrapper(alg, G)
+        logging.info('round {0}: with res = {1}'.format(i, res))
+        for k in report:
+            report[k] += res[k]
+    for k in report:
+        report[k] /= num_times
     return report
         
 def save_tree_txt(tree, alg_name):
@@ -105,7 +104,7 @@ def save_tree_txt(tree, alg_name):
 
             
 if __name__ == '__main__':
-    method_chocies = ['info-clustering', 'gn', 'bhcd', 'all']
+    method_chocies = ['info-clustering', 'bhcd', 'all']
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_graph', default=0, type=int, help='whether to save gv file')
     parser.add_argument('--load_graph', help='use custom gml file to initialize the graph')     
@@ -114,7 +113,8 @@ if __name__ == '__main__':
     parser.add_argument('--weight', default='triangle-power', help='for info-clustering method, the edge weight shold be used. This parameters'
         ' specifies how to modify the edge weight.')    
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
-    parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')                      
+    parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')
+    parser.add_argument('--num_times', default=10, type=int, help='the number of times of evaluation')                      
     args = parser.parse_args()
     method_chocies.pop()
     if(args.debug):
@@ -130,8 +130,6 @@ if __name__ == '__main__':
         args.alg = method_chocies
     if(args.alg.count('info-clustering')>0):
         methods.append(info_clustering_prediction())
-    if(args.alg.count('gn')>0):
-        methods.append(GN())
     if(args.alg.count('bhcd')>0):
         methods.append(BHCD(restart=bhcd_parameter.restart, 
             gamma=bhcd_parameter.gamma, _lambda=bhcd_parameter._lambda, delta=bhcd_parameter.delta))
@@ -141,7 +139,7 @@ if __name__ == '__main__':
     if(args.evaluate == 2):
         print('logging to', LOGGING_FILE)
         for method in methods:
-            report = evaluate(args.evaluate, method, args.z_in_1, args.z_in_2, z_o)
+            report = evaluate(args.num_times, method, G)
             logging.info('final report' + json.dumps(report))
     elif(args.evaluate == 1):
         for i, method in enumerate(methods):
