@@ -74,7 +74,7 @@ def evaluate(num_times, method_dic, G):
         new_g, test_edge_list = train_test_split(G)     
         for alg_name, method in method_dic.items():
             logging.info('eval ' + alg_name + ' round=%d/%d'%(i, num_times))    
-            res = evaluate_single(alg, test_edge_list, new_g)      
+            res = evaluate_single(method, test_edge_list, new_g)      
             for k in report[alg_name]:
                 report[alg_name][k] += res[k]
     for alg_name in method_dic:
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
             print('running ' + alg_name)
-            res = evaluate_single_wrapper(method_dic, G)
+            res = evaluate_single_wrapper(method, G)
             print('evaluation result for ', alg_name, res)
     else:
         for method in methods:
