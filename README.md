@@ -8,3 +8,8 @@ python3 experiment_nips_author.py --seed=1 --num_times=10 --evaluate=2
 ```
 produces the following result:
 [Table](https://programmierung.oss-cn-shenzhen.aliyuncs.com/research/info-clustering/experiment/nips-authorship/compare.html)
+
+# NIPS-full
+```shell
+python experiment_nips_author.py --report_times --save_tree=2 --load_graph=nips-full.gml --evaluate=0
+```

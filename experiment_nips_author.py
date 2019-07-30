@@ -2,6 +2,7 @@
 '''
 import random
 import argparse
+import time
 from datetime import datetime
 import pdb
 import logging
@@ -103,8 +104,9 @@ if __name__ == '__main__':
         ' specifies how to modify the edge weight.')    
     parser.add_argument('--tablefmt', default='latex-raw', choices=['latex-raw', 'html'], help='save table format')
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
-    parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')
+    parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, only fit, no evaluation.')
     parser.add_argument('--num_times', default=10, type=int, help='the number of times of evaluation')                      
+    parser.add_argument('--report_times', default=False, type=bool, nargs='?', const=True, help='whether to report the time used to run the algorithm')  
     parser.add_argument('--seed', default=0, type=int, help='positive integer to seed the numpy random generator')                          
     args = parser.parse_args()
     method_chocies.pop()
@@ -112,6 +114,10 @@ if __name__ == '__main__':
         pdb.set_trace()
     if(args.load_graph):
         G = nx.read_gml(os.path.join('build', args.load_graph))
+        if(type(G) is nx.DiGraph):
+            G = G.to_undirected()
+        if(G.nodes.get(0) is None):
+            G = nx.convert_node_labels_to_integers(G)           
     else:
         G = nx.read_gml(os.path.join('build', 'nips-234.gml'))    
     if(args.save_graph):
@@ -150,7 +156,13 @@ if __name__ == '__main__':
             print('evaluation result for ', alg_name, res)
     else:
         for method in methods:
+            print('fitting for', type(method))
+            if(args.report_times):
+                start_time = time.time()                
             method.fit(G)
+            if(args.report_times):            
+                end_time = time.time()
+                print('time used: ', end_time - start_time)
     if(args.save_tree):
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
