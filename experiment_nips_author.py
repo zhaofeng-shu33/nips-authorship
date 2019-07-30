@@ -62,25 +62,24 @@ def evaluate(num_times, method_dic, G):
     '''
         num_times: int
     '''
-    report = {
-        "tpr": 0,
-        "tnr": 0,
-        "acc": 0
-    }
+    report = {}
+    for alg_name in method_dic:
+        report[alg_name] = {
+            "tpr": 0,
+            "tnr": 0,
+            "acc": 0
+        }
+
     for i in range(num_times):
-    for alg_name, method in method_dic.items():
-        print('running ' + alg_name)
-        res = evaluate_single_wrapper(method, G)            
-    
-    logging.info('eval ' + str(type(alg)) + ' num_times=%d'%(num_times))
-      
-        res = evaluate_single_wrapper(alg, G)
-        logging.info('round {0}: with res = {1}'.format(i, res))
-        for k in report:
-            report[k] += res[k]
-    for k in report:
-        report[k] /= num_times
-    print('evaluation result for ', alg_name, res)           
+        new_g, test_edge_list = train_test_split(G)     
+        for alg_name, method in method_dic.items():
+            logging.info('eval ' + alg_name + ' round=%d/%d'%(i, num_times))    
+            res = evaluate_single(alg, test_edge_list, new_g)      
+            for k in report[alg_name]:
+                report[alg_name][k] += res[k]
+    for alg_name in method_dic:
+        for k in report[alg_name]:
+            report[alg_name][k] /= num_times
         
     return report
         
