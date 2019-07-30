@@ -131,17 +131,22 @@ if __name__ == '__main__':
     if(args.evaluate == 2):
         print('logging to', LOGGING_FILE)
         tabulate_dic = {}
-        for i, method in enumerate(methods):
-            report = evaluate(args.num_times, method, G)
-            tabulate_dic[args.alg[i]] = report
-            logging.info('final report' + json.dumps(report))
-        make_table(tabulate_dic, 'compare')
-    elif(args.evaluate == 1):
         method_dic = {}
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
             method_dic[alg_name] = method
-        evaluate(args.num_times, method_dic, G)
+        report = evaluate(args.num_times, method_dic, G)
+        logging.info('final report' + json.dumps(report))        
+        for i, method in enumerate(methods):
+            alg_name = args.alg[i]
+            tabulate_dic[alg_name] = report[alg_name]
+        make_table(tabulate_dic, 'compare')
+    elif(args.evaluate == 1):
+        for i, method in enumerate(methods):
+            alg_name = args.alg[i]
+            print('running ' + alg_name)
+            res = evaluate_single_wrapper(method_dic, G)
+            print('evaluation result for ', alg_name, res)
     else:
         for method in methods:
             method.fit(G)
@@ -151,4 +156,4 @@ if __name__ == '__main__':
             if(args.save_tree == 2):
                 save_tree_txt(method.tree, alg_name)
             elif(args.save_tree == 1):
-                plot_clustering_tree(method.tree, alg_name, args.save_tree)
+                plot_clustering_tree(method.tree, alg_name)
