@@ -101,6 +101,7 @@ if __name__ == '__main__':
     parser.add_argument('--alg', default='all', choices=method_chocies, help='which algorithm to run', nargs='+')
     parser.add_argument('--weight', default='triangle-power', help='for info-clustering method, the edge weight shold be used. This parameters'
         ' specifies how to modify the edge weight.')    
+    parser.add_argument('--tablefmt', default='latex-raw', choices=['latex-raw', 'html'], help='save table format')
     parser.add_argument('--debug', default=False, type=bool, nargs='?', const=True, help='whether to enter debug mode')                  
     parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, no evaluation.')
     parser.add_argument('--num_times', default=10, type=int, help='the number of times of evaluation')                      
@@ -140,7 +141,7 @@ if __name__ == '__main__':
         for i, method in enumerate(methods):
             alg_name = args.alg[i]
             tabulate_dic[alg_name] = report[alg_name]
-        make_table(tabulate_dic, 'compare')
+        make_table(tabulate_dic, 'compare', args.tablefmt)
     elif(args.evaluate == 1):
         for i, method in enumerate(methods):
             alg_name = args.alg[i]

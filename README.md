@@ -2,3 +2,9 @@ currently, the data is freely available at [https://github.com/nishma-laitonjam/
 
 # NIPS-234
 ![](./nips-234.svg)
+
+```shell
+python3 experiment_nips_author.py --seed=1 --num_times=10 --evaluate=2
+```
+produces the following result:
+[Table](https://programmierung.oss-cn-shenzhen.aliyuncs.com/research/info-clustering/experiment/nips-authorship/compare.html)
