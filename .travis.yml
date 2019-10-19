@@ -4,3 +4,4 @@ language: python
 python: 3.6
 script:
   - python test_ic_prediction.py
+  - python process_data.py

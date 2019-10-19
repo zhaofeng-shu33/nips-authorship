@@ -1,6 +1,8 @@
-currently, the data is freely available at [https://github.com/nishma-laitonjam/S-AGM/blob/master/MatlabComparison/Datasets/nips_1-17.mat](https://github.com/nishma-laitonjam/S-AGM/blob/master/MatlabComparison/Datasets/nips_1-17.mat)
+[![Build Status](https://travis-ci.com/zhaofeng-shu33/nips-authorship.svg?branch=master)](https://travis-ci.com/zhaofeng-shu33/nips-authorship)
 
-# NIPS-234
+Currently, the data is freely available at [nishma-laitonjam/S-AGM](https://github.com/nishma-laitonjam/S-AGM/blob/master/MatlabComparison/Datasets/nips_1-17.mat)
+
+## NIPS-234
 ![](./nips-234.svg)
 
 ```shell
