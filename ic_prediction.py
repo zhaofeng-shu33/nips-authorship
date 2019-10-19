@@ -30,7 +30,7 @@ class info_clustering_prediction(InfoCluster):
         self.G = _G.copy()
         if(weight_method=='triangle-power'):            
             info_clustering_add_weight(self.G)
-        super().fit(self.G, use_psp_i=True)
+        super().fit(self.G)
         # self.tree is available
     
     def get_weight(self, node_i, node_j):
@@ -65,7 +65,7 @@ class info_clustering_prediction(InfoCluster):
         else:           
             affinity_matrix[node_index_jj, node_index_ii] = weight_added
         new_ic = InfoCluster(affinity='precomputed')
-        new_ic.fit(affinity_matrix, use_psp_i=True)            
+        new_ic.fit(affinity_matrix)            
         is_solution_trivial = len(new_ic.critical_values) == 1
         return is_solution_trivial
         

@@ -1,0 +1,3 @@
+numpy
+networkx
+info_cluster
