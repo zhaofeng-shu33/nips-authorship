@@ -5,3 +5,5 @@ graphviz
 bhcd
 ete3
 six
+tabulate
+sklearn
