@@ -3,5 +3,8 @@ dist: xenial
 language: python
 python: 3.6
 script:
+  - mkdir -p build
+  - wget https://github.com/nishma-laitonjam/S-AGM/raw/master/MatlabComparison/Datasets/nips_1-17.mat -P build
   - python test_ic_prediction.py
   - python process_data.py
+  - python experiment_nips_author.py
