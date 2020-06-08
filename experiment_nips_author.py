@@ -28,7 +28,14 @@ from evaluation import evaluate_single
 LOGGING_FILE = 'nips_authorship.log'
 logging.basicConfig(filename=os.path.join('build', LOGGING_FILE), level=logging.INFO, format='%(asctime)s %(message)s')
 
-            
+class ResourceAllocationIndex:
+    def fit(self, G):
+        self.G = G
+    def predict(self, node_index_i, node_index_j):
+        preds = nx.resource_allocation_index(self.G, [(node_index_i, node_index_j)])
+        _, _, p = list(preds)[0]      
+        return p > 0.5
+
 def plot_clustering_tree(tree, alg_name):
     ts = TreeStyle()
     ts.rotation = 90
@@ -94,7 +101,7 @@ def save_tree_txt(tree, alg_name):
 
             
 if __name__ == '__main__':
-    method_chocies = ['info-clustering', 'bhcd', 'all']
+    method_chocies = ['info-clustering', 'bhcd', 'rai', 'all']
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_graph', default=0, type=int, help='whether to save gv file')
     parser.add_argument('--load_graph', help='use custom gml file to initialize the graph')     
@@ -129,6 +136,8 @@ if __name__ == '__main__':
         methods.append(info_clustering_prediction())
     if(args.alg.count('bhcd') > 0):
         methods.append(BHCD())
+    if args.alg.count('rai') > 0:
+        methods.append(ResourceAllocationIndex())
     if(len(methods)==0):
         raise ValueError('unknown algorithm')
     
