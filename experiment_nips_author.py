@@ -101,7 +101,7 @@ def save_tree_txt(tree, alg_name):
 
             
 if __name__ == '__main__':
-    method_chocies = ['info-clustering', 'bhcd', 'rai', 'all']
+    method_chocies = ['GBIC', 'BHCD', 'RAI', 'all']
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_graph', default=0, type=int, help='whether to save gv file')
     parser.add_argument('--load_graph', help='use custom gml file to initialize the graph')     
@@ -132,17 +132,17 @@ if __name__ == '__main__':
     methods = []
     if(args.alg.count('all') > 0):
         args.alg = method_chocies
-    if(args.alg.count('info-clustering') > 0):
+    if(args.alg.count('GBIC') > 0):
         methods.append(info_clustering_prediction())
-    if(args.alg.count('bhcd') > 0):
+    if(args.alg.count('BHCD') > 0):
         methods.append(BHCD())
-    if args.alg.count('rai') > 0:
+    if args.alg.count('RAI') > 0:
         methods.append(ResourceAllocationIndex())
     if(len(methods)==0):
         raise ValueError('unknown algorithm')
     
-    if(args.seed > 0):
-        np.random.seed(args.seed)
+
+    np.random.seed(args.seed)
     
     if(args.evaluate == 2):
         print('logging to', LOGGING_FILE)
