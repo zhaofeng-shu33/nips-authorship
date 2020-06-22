@@ -114,7 +114,8 @@ if __name__ == '__main__':
     parser.add_argument('--evaluate', default=1, type=int, help='when evaluate=1, evaluate the method once; when evaluate=2, iterate given times; evaluate=0, only fit, no evaluation.')
     parser.add_argument('--num_times', default=10, type=int, help='the number of times of evaluation')                      
     parser.add_argument('--report_times', default=False, type=bool, nargs='?', const=True, help='whether to report the time used to run the algorithm')  
-    parser.add_argument('--seed', default=0, type=int, help='positive integer to seed the numpy random generator')                          
+    parser.add_argument('--seed', default=2, type=int, help='positive integer to seed the numpy random generator')
+
     args = parser.parse_args()
     method_chocies.pop()
     if(args.debug):
